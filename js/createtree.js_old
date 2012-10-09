@@ -1,0 +1,248 @@
+//global variable to allow console inspection of tree:
+var tree;
+var schoolcount={};
+var preschoolcount={};
+var currentprograms={}
+var boundaryschoolcount={};
+var boundarypreschoolcount={};
+
+
+function treeInit() 
+{
+  //instantiate the tree:
+  tree = new YAHOO.widget.TreeView("rootnode");
+  var schoolNode =new YAHOO.widget.TextNode("schoolcount",tree.getRoot(),false);
+  var preschoolNode=new YAHOO.widget.TextNode("preschoolcount",tree.getRoot(),false);
+  var currentProgramsNode=new YAHOO.widget.TextNode("currentprograms",tree.getRoot(),false);
+  
+  createChildNodes(schoolNode,schoolcount,schoolkeys);
+  createChildNodes(preschoolNode,preschoolcount,preschoolkeys);
+  
+   // Expand and collapse happen prior to the actual expand/collapse,
+   // and can be used to cancel the operation
+   tree.subscribe("expand", function(node) 
+   {
+     YAHOO.log(node.index + " was expanded", "info", "example");
+     // return false; // return false to cancel the expand
+   });
+
+   tree.subscribe("collapse", function(node) 
+   {
+     YAHOO.log(node.index + " was collapsed", "info", "example");
+   });
+
+   // Trees with TextNodes will fire an event for when the label is clicked:
+   tree.subscribe("labelClick", function(node) 
+   {
+     getdata(node);
+     YAHOO.log(node.index + " label was clicked", "info", "example");
+   });
+
+   //The tree is not created in the DOM until this method is called:
+   tree.draw();
+}
+
+
+function getdata(node)
+{
+  if(node["label"]=="currentprograms")
+  {
+    var content="<div class='div-table'><div class='div-table-caption' >Current Programs</div>";
+    for(num in currentprograms)
+    {
+      program=currentprograms[num];
+      content=content+"<div class='div-table-row'><div class='div-table-col  style='width:220px'>"+program+"</div></div>";
+    }
+    content=content+"</div>"
+    document.getElementById("load_data").innerHTML=content;
+    return;
+  }
+  depth=node["depth"];
+  if(depth==0)
+  {
+     //its the root
+    root=node["label"];
+    var data;
+    if(root=="schoolcount")
+      data=schoolcount;
+    else
+      data=prechoolcount;
+    var content="<div class='div-table'><div class='div-table-caption' >Counts</div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School Count</div><div class='div-table-col'>"+data[node["label"]]["scount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School with Students Count</div><div class='div-table-col'>"+data[node["label"]]["sstucount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active Students Count</div><div class='div-table-col'>"+data[node["label"]]["stucount"]+"</div></div></div>";
+    content=content+"<br><br>";
+    content=content+"<div class='div-table'><div class='div-table-caption'>Assessment Counts</div><div  class='div-table-row'><div class='div-table-col' style='width:110px'>Program Name</div><div class='div-table-col' style='width:110px'>Assessment Name</div><div class='div-table-col' style='width:110px'>Schools Mapped</div><div class='div-table-col' style='width:110px'>Schools Assessed</div><div class='div-table-col' style='width:110px'>Student Assessed</div></div>";
+    var asscount=0;
+    var pkeys=keys(data[node["label"]]["assessmentcount"]).sort();
+    for (pkey in pkeys)
+    {
+      var pname=pkeys[pkey];
+      var asskeys=keys(data[node["label"]]["assessmentcount"][pname]).sort();
+      for (akey in asskeys)
+      {
+         var assname=asskeys[akey];
+         asscount=asscount+1;
+         content=content+"<div class='div-table-row'><div class='div-table-col  style='width:110px'>"+pname+"</div><div class='div-table-col  style='width:110px'>"+assname+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsmapped"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsassessed"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["studentsassessed"]+"</div></div>";
+      }
+    }
+    if(asscount==0)
+    {
+      content=content+"<div  class='div-table-row'><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div></div>";
+    }
+    content=content+"</div>";
+      
+    document.getElementById("load_data").innerHTML=content;
+ 
+  }
+  if(depth==1)
+  {
+    //district
+    root=node["parent"]["label"];
+    var data;
+    if(root=="schoolcount")
+      data=boundaryschoolcount[1]
+    else
+      data=boundarypreschoolcount[1]
+    var content="<div class='div-table'><div class='div-table-caption' >Counts</div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School Count</div><div class='div-table-col'>"+data[node["label"]]["scount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School with Students Count</div><div class='div-table-col'>"+data[node["label"]]["sstucount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active Students Count</div><div class='div-table-col'>"+data[node["label"]]["stucount"]+"</div></div></div>";
+    content=content+"<br><br>";
+    content=content+"<div class='div-table'><div class='div-table-caption'>Assessment Counts</div><div  class='div-table-row'><div class='div-table-col' style='width:110px'>Program Name</div><div class='div-table-col' style='width:110px'>Assessment Name</div><div class='div-table-col' style='width:110px'>Schools Mapped</div><div class='div-table-col' style='width:110px'>Schools Assessed</div><div class='div-table-col' style='width:110px'>Student Assessed</div></div>";
+    var asscount=0;
+    var pkeys=keys(data[node["label"]]["assessmentcount"]).sort();
+    for (pkey in pkeys)
+    {
+      var pname=pkeys[pkey];
+      var asskeys=keys(data[node["label"]]["assessmentcount"][pname]).sort();
+      for (akey in asskeys)
+      {
+         var assname=asskeys[akey];
+         asscount=asscount+1;
+         content=content+"<div class='div-table-row'><div class='div-table-col  style='width:110px'>"+pname+"</div><div class='div-table-col  style='width:110px'>"+assname+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsmapped"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsassessed"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["studentsassessed"]+"</div></div>";
+      }
+    }
+    if(asscount==0)
+    {
+      content=content+"<div  class='div-table-row'><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div></div>";
+    }
+    content=content+"</div>";
+      
+    document.getElementById("load_data").innerHTML=content;
+  }
+  if(depth==2)
+  {
+    //block
+    root=node["parent"]["parent"]["label"];
+    if(root=="schoolcount")
+      data=boundaryschoolcount[2]
+    else
+      data=boundarypreschoolcount[2]
+    var content="<div class='div-table'><div class='div-table-caption' >Counts</div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School Count</div><div class='div-table-col'>"+data[node["label"]]["scount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School with Students Count</div><div class='div-table-col'>"+data[node["label"]]["sstucount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active Students Count</div><div class='div-table-col'>"+data[node["label"]]["stucount"]+"</div></div></div>";
+    content=content+"<br><br>";
+    content=content+"<div class='div-table'><div class='div-table-caption'>Assessment Counts</div><div  class='div-table-row'><div class='div-table-col' style='width:110px'>Program Name</div><div class='div-table-col' style='width:110px'>Assessment Name</div><div class='div-table-col' style='width:110px'>Schools Mapped</div><div class='div-table-col' style='width:110px'>Schools Assessed</div><div class='div-table-col' style='width:110px'>Student Assessed</div></div>";
+    var asscount=0;
+    var pkeys=keys(data[node["label"]]["assessmentcount"]).sort();
+    for (pkey in pkeys)
+    {
+      var pname=pkeys[pkey];
+      var asskeys=keys(data[node["label"]]["assessmentcount"][pname]).sort();
+      for (akey in asskeys)
+      {
+         var assname=asskeys[akey];
+         asscount=asscount+1;
+         content=content+"<div class='div-table-row'><div class='div-table-col  style='width:110px'>"+pname+"</div><div class='div-table-col  style='width:110px'>"+assname+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsmapped"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsassessed"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["studentsassessed"]+"</div></div>";
+      }
+    }
+    if(asscount==0)
+    {
+      content=content+"<div  class='div-table-row'><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div></div>";
+    }
+    content=content+"</div>";
+      
+    document.getElementById("load_data").innerHTML=content;
+ 
+  }
+  if(depth==3)
+  {
+    //cluster
+    root=node["parent"]["parent"]["parent"]["label"];
+    district=node["parent"]["parent"]["label"];
+    block=node["parent"]["label"];
+    if(root=="schoolcount")
+      data=schoolcount[district][block]
+    else
+      data=preschoolcount[district][block]
+    var content="<div class='div-table'><div class='div-table-caption' >Counts</div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School Count</div><div class='div-table-col'>"+data[node["label"]]["scount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active School with Students Count</div><div class='div-table-col'>"+data[node["label"]]["sstucount"]+"</div></div><div class='div-table-row'><div class='div-table-col  style='width:110px'>Active Students Count</div><div class='div-table-col'>"+data[node["label"]]["stucount"]+"</div></div></div>";
+    content=content+"<br><br>";
+    content=content+"<div class='div-table'><div class='div-table-caption'>Assessment Counts</div><div  class='div-table-row'><div class='div-table-col' style='width:110px'>Program Name</div><div class='div-table-col' style='width:110px'>Assessment Name</div><div class='div-table-col' style='width:110px'>Schools Mapped</div><div class='div-table-col' style='width:110px'>Schools Assessed</div><div class='div-table-col' style='width:110px'>Student Assessed</div></div>";
+    var asscount=0;
+    var pkeys=keys(data[node["label"]]["assessmentcount"]).sort();
+    for (pkey in pkeys)
+    {
+      var pname=pkeys[pkey];
+      var asskeys=keys(data[node["label"]]["assessmentcount"][pname]).sort();
+      for (akey in asskeys)
+      {
+         var assname=asskeys[akey];
+         asscount=asscount+1;
+         content=content+"<div class='div-table-row'><div class='div-table-col  style='width:110px'>"+pname+"</div><div class='div-table-col  style='width:110px'>"+assname+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsmapped"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["schoolsassessed"]+"</div><div class='div-table-col'>"+data[node["label"]]["assessmentcount"][pname][assname]["studentsassessed"]+"</div></div>";
+      }
+    }
+    if(asscount==0)
+    {
+      content=content+"<div  class='div-table-row'><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div><div class='div-table-col' style='width:110px'>-</div></div>";
+    }
+    content=content+"</div>";
+      
+    document.getElementById("load_data").innerHTML=content;
+ 
+  }
+}
+
+
+function createChildNodes(treenode,datacount,datakeys)
+{
+  for (key in datakeys)
+  {
+     var district=datakeys[key];
+     var districtNode = new YAHOO.widget.TextNode(district, treenode, false);
+     blockkeys=keys(datacount[district]).sort();
+     for (bkey in blockkeys)
+     { 
+       var block=blockkeys[bkey];
+       var blockNode = new YAHOO.widget.TextNode(block, districtNode, false);
+       clusterkeys=keys(datacount[district][block]).sort();
+       for (ckey in clusterkeys)
+       { 
+         var cluster=clusterkeys[ckey];
+         var clusterNode = new YAHOO.widget.TextNode(cluster, blockNode, false);
+       }  
+     }  
+  }
+}
+
+
+function keys(obj)
+{
+    var keys = [];
+
+    for(var key in obj)
+    {
+        if(obj.hasOwnProperty(key))     
+        {
+            keys.push(key);
+        }
+    }
+
+    return keys;
+}
+
+
+function createTree(statusinfo)
+{
+  schoolcount=statusinfo["schoolcount"];
+  schoolkeys=keys(statusinfo["schoolcount"]).sort();
+  preschoolcount=statusinfo["preschoolcount"];
+  preschoolkeys=keys(statusinfo["preschoolcount"]).sort();
+  currentprograms=statusinfo["currentprograms"];
+  boundaryschoolcount=statusinfo["boundaryschoolcount"];
+  boundarypreschoolcount=statusinfo["boundarypreschoolcount"];
+
+  YAHOO.util.Event.onDOMReady(treeInit);
+}

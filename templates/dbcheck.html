@@ -1,0 +1,42 @@
+$def with (statusinfo)
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Default TreeView</title>
+
+<style type="text/css">
+body {
+	margin:0;
+	padding:0;
+}
+</style>
+
+<link type="text/css" rel="stylesheet" href="grid.css"/>
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/treeview/assets/skins/sam/treeview.css" />
+<script type="text/javascript" src="http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.9.0/build/treeview/treeview-min.js"></script>
+<script type="text/javascript" src="/js/createtree.js"></script>
+<!--begin custom header content for this example-->
+<style>
+    #treeDiv1 {background: #fff; padding:1em;}
+</style>
+<!--end custom header content for this example-->
+
+</head>
+
+<body class="yui-skin-sam" onload="createTree($statusinfo)">
+<div class="container container_12">
+<div class="grid_6">
+<div id="rootnode"></div>
+</div>
+<div class="grid_6">
+<div id="load_data">
+</div>
+Another pane!!
+</div>
+</div>
+
+</body>
+</html>

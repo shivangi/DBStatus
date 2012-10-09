@@ -1,0 +1,15 @@
+Set the klpconfig.ini in config directory with the following fields and set them accordingly:-
+[KLP_Database]
+dbname=dbname
+user=username
+passwd=password
+[Status_Database]
+dbname=status dbname
+user=username
+passwd=password
+
+
+Also set the cron entry as:-
+30 06 * * * completedirectorypath/dbstatus.sh 1>completedirectorypath/redirectedoutputfile 2>completedirectorypath/redirectederrorfile
+
+YUI version 2.9.0 should be there.
